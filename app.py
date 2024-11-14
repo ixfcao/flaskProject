@@ -1,4 +1,5 @@
 from flask import Flask,request,render_template
+from datetime import datetime
 
 # 使用Flask类创建一个app对象
 # __name__: 代表当前app.py 这个模块
@@ -6,6 +7,13 @@ from flask import Flask,request,render_template
 # 1 以后出现bug可以帮我们快速定位
 # 2 对于寻找模版文件，有一个相对路径
 app = Flask(__name__)
+
+# 定义一个函数 把这个函数定义为过滤器
+def datetime_format(value, format="%Y年%m月%d日 %H:%M"):
+    return value.strftime(format)
+
+app.add_template_filter (datetime_format, 'dformat')
+
 
 # 创建一个路由和视图函数的映射
 # url与视图：path与视图
@@ -56,6 +64,43 @@ def book_list():
     # request.args:类字典类型
     page = request.args.get("page", default=1, type=int)
     return f"您获取的是第{page}页的图书列表数据"  # f字符串
+
+# 过滤器 length：求长度，abs：求绝对值
+@app.route('/filter')
+def filter_demo():
+    user = User(id=2,username="知了lll", email="<EMAIL>@qq.com", password="<mmPASSWORD>")
+
+    mytime = datetime.now()
+    return render_template("filter.html", user=user,mytime=mytime)
+
+# 控制语句
+
+@app.route('/control')
+def control_statement():
+    age = 17
+    book = [{
+        "name":"三国演义",
+        "author":"罗贯中"
+    }],[{
+        "name":"西游记",
+        "author":"吴承恩"
+    }]
+    # book = book 传入模版当中
+    return render_template("control.html",age=age,book=book)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == '__main__':

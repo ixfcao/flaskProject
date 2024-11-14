@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>控制语句</title>
+</head>
+<body>
+{% if age > 18 %}
+    <div>您已经满18岁了，可以进入网吧</div>
+    {% elif age == 18 %}
+    <div>您刚满18岁，需要父母陪同</div>
+    {% else %}
+    <div>你未满18岁，不允许进行网吧</div>
+{% endif %}
+
+{% for book in books %}
+    <div>图书名称：{{ book.name }},图书作者:{{ book.author }}</div>
+{% endfor %}
+</body>
+</html>
