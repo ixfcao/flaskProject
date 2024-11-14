@@ -3,7 +3,7 @@ from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
-
+from sqlalchemy.testing.suite.test_reflection import users
 
 # 使用Flask类创建一个app对象
 # __name__: 代表当前app.py 这个模块
@@ -13,39 +13,31 @@ from sqlalchemy import text
 app = Flask(__name__)
 
 
-
 # MySQL所在的主机名
 HOSTNAME = "127.0.0.1"
-
 # MySQL监听的端口号，默认3306
 PORT = 3306
-
 # 连接MySQL的用户名，读者用自己的设置的
 USERNAME = "root"
-
 # 连接MySQL的密码，读者用自己的
 PASSWORD = "rootroot"
-
 # MySQL上创建的数据库名称
-DATABASE = "rest_reservation"
-
+DATABASE = "flask_project"
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{USERNAME}:{PASSWORD}@{HOSTNAME}:{PORT}/{DATABASE}?charset=utf8"
-
-
 
 # 在app.config中设置好连接数据库的信息
 # 然后使用SQLAlchemy(app)中创建一个db对象
 # 在SQLAlchemy 会自动读取app.config中连接数据库的信息
 db = SQLAlchemy(app)
 
-# 连接数据库
-with app.app_context():
-    with db.engine.connect() as conn:
-        # 这个地方一直报错，改成stmt这样才可以，直接信
-        #  使用 text 函数来创建可执行的 SQL 查询对象，以确保查询被正确执行
-        stmt  = text("SELECT 1")
-        rs = conn.execute(stmt)
-        print(rs.fetchone())
+# 连接数据库 测试
+# with app.app_context():
+#     with db.engine.connect() as conn:
+#         # 这个地方一直报错，改成stmt这样才可以，直接信
+#         #  使用 text 函数来创建可执行的 SQL 查询对象，以确保查询被正确执行
+#         stmt  = text("SELECT 1")
+#         rs = conn.execute(stmt)
+#         print(rs.fetchone())
 
 
 
@@ -68,6 +60,25 @@ class User:
         self.username = username
         self.email = email
         self.password = password
+
+# orm模型
+class Student(db.Model):
+    __tablename__ = "student"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True) #自增
+    username = db.Column(db.String(200), nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+
+# student = Student(username="小吴",password="<67678>")
+# sql: insert student (username,password) values ('小吴','<67678>')
+# 把所有的表映射进数据库 需要手动推一个应用上下文
+with app.app_context(): #这行代码创建了一个 Flask 应用上下文。在 Flask 中，某些操作（如数据库操作）需要在一个活动的应用上下文中进行。app.app_context() 提供了这样一个上下文。
+                        #with 语句确保在块结束时自动清理上下文。
+    db.create_all()
+
+
+
+
+
 
 @app.route('/')
 def hello_world():  # put application's code here
@@ -141,14 +152,6 @@ def child2():
 @app.route('/static')
 def static_demo():
     return render_template( "static.html")
-
-
-
-
-
-
-
-
 
 
 
