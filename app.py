@@ -1,12 +1,54 @@
 from flask import Flask,request,render_template
 from datetime import datetime
 
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
+
+
 # 使用Flask类创建一个app对象
 # __name__: 代表当前app.py 这个模块
 #  作用：
 # 1 以后出现bug可以帮我们快速定位
 # 2 对于寻找模版文件，有一个相对路径
 app = Flask(__name__)
+
+
+
+# MySQL所在的主机名
+HOSTNAME = "127.0.0.1"
+
+# MySQL监听的端口号，默认3306
+PORT = 3306
+
+# 连接MySQL的用户名，读者用自己的设置的
+USERNAME = "root"
+
+# 连接MySQL的密码，读者用自己的
+PASSWORD = "rootroot"
+
+# MySQL上创建的数据库名称
+DATABASE = "rest_reservation"
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{USERNAME}:{PASSWORD}@{HOSTNAME}:{PORT}/{DATABASE}?charset=utf8"
+
+
+
+# 在app.config中设置好连接数据库的信息
+# 然后使用SQLAlchemy(app)中创建一个db对象
+# 在SQLAlchemy 会自动读取app.config中连接数据库的信息
+db = SQLAlchemy(app)
+
+# 连接数据库
+with app.app_context():
+    with db.engine.connect() as conn:
+        # 这个地方一直报错，改成stmt这样才可以，直接信
+        #  使用 text 函数来创建可执行的 SQL 查询对象，以确保查询被正确执行
+        stmt  = text("SELECT 1")
+        rs = conn.execute(stmt)
+        print(rs.fetchone())
+
+
+
 
 # 定义一个函数 把这个函数定义为过滤器
 def datetime_format(value, format="%Y年%m月%d日 %H:%M"):
