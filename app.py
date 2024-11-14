@@ -88,6 +88,18 @@ def control_statement():
     # book = book 传入模版当中
     return render_template("control.html",age=age,book=book)
 
+@app.route('/child1')
+def child1():
+    return render_template( "child1.html")
+
+@app.route('/child2')
+def child2():
+    return render_template( "child2.html")
+
+@app.route('/static')
+def static_demo():
+    return render_template( "static.html")
+
 
 
 
