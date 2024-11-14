@@ -68,12 +68,84 @@ class Student(db.Model):
     username = db.Column(db.String(200), nullable=False)
     password = db.Column(db.String(200), nullable=False)
 
+    articles = db.relationship('Article', back_populates='author')
+
+class Article(db.Model):
+    __tablename__ = "article"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # 自增
+    title = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+
+    # 添加作者外键
+    author_id = db.Column(db.Integer, db.ForeignKey("student.id"))
+    author =db.relationship("Student",back_populates="articles")
+
+# article = Article("title",content="FalseXXXXXX")
+
+# article.author = Student.query.get(article.author_id)
+# print(article.author)
+# 拿到所有文章
+
+
 # student = Student(username="小吴",password="<67678>")
 # sql: insert student (username,password) values ('小吴','<67678>')
 # 把所有的表映射进数据库 需要手动推一个应用上下文
 with app.app_context(): #这行代码创建了一个 Flask 应用上下文。在 Flask 中，某些操作（如数据库操作）需要在一个活动的应用上下文中进行。app.app_context() 提供了这样一个上下文。
                         #with 语句确保在块结束时自动清理上下文。
     db.create_all()
+
+# 添加
+@app.route("/student/add")
+def add_student():
+    # 1.创建学生对象
+    student = Student(username="学生张珊11",password="11111")
+    # 2.将ORM对象添加到db.session中
+    db.session.add(student)
+    # 3.将db。session中的改变同步到数据库中
+    db.session.commit()
+    return "学生创建成功"
+# 查找
+@app.route("/student/query")
+def query_student():
+    # 1.get查找：根据主键查找
+    # student = Student.query.get(1)
+    # print(f"{student.id}:{student.username}:{student.password}")
+
+    # 2.filter_by查找
+    # QuerySet
+    students = Student.query.filter_by(username="学生张珊")
+    for student in students:
+        print(student.username)
+    return "数据查找成功"
+# 修改
+@app.route("/student/update")
+def update_student():
+    # 1.get查找：根据主键查找
+    student = Student.query.filter_by(username="学生张珊").first()
+    student.password = "222222"
+    db.session.commit()
+    return "数据修改成功"
+
+@app.route("/student/delete")
+def delete_student():
+    student = Student.query.get(1)
+    db.session.delete(student)
+    db.session.commit()
+    return "数据删除成功"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
