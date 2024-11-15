@@ -1,9 +1,11 @@
 from flask import Flask,request,render_template
 from datetime import datetime
 
+from flask_migrate import migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from sqlalchemy.testing.suite.test_reflection import users
+
 
 # 使用Flask类创建一个app对象
 # __name__: 代表当前app.py 这个模块
@@ -29,6 +31,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{USERNAME}:{PASSWORD}@
 # 然后使用SQLAlchemy(app)中创建一个db对象
 # 在SQLAlchemy 会自动读取app.config中连接数据库的信息
 db = SQLAlchemy(app)
+
 
 # 连接数据库 测试
 # with app.app_context():
@@ -68,7 +71,7 @@ class Student(db.Model):
     username = db.Column(db.String(200), nullable=False)
     password = db.Column(db.String(200), nullable=False)
 
-    articles = db.relationship('Article', back_populates='author')
+    # articles = db.relationship('Article', back_populates='author') #和下面的一一对应
 
 class Article(db.Model):
     __tablename__ = "article"
@@ -78,13 +81,18 @@ class Article(db.Model):
 
     # 添加作者外键
     author_id = db.Column(db.Integer, db.ForeignKey("student.id"))
-    author =db.relationship("Student",back_populates="articles")
+    # author = db.relationship("Student",back_populates="articles") # back_populates
+
+    # 使用这个backref 会自动给模型User添加一个articles的属性用来获取文章列表
+    author = db.relationship("Student", backref="articles")
 
 # article = Article("title",content="FalseXXXXXX")
 
 # article.author = Student.query.get(article.author_id)
 # print(article.author)
 # 拿到所有文章
+
+
 
 
 # student = Student(username="小吴",password="<67678>")
@@ -132,6 +140,29 @@ def delete_student():
     db.session.delete(student)
     db.session.commit()
     return "数据删除成功"
+
+
+@app.route("/article/add")
+def add_article():
+    article1 = Article(title="Flask学习教程",content="flask-xxx")
+    article1.author = Student.query.get(2)
+
+    article2 = Article(title="Java学习教程",content="java好难学")
+    article2.author = Student.query.get(2)
+
+    # 添加到session
+    db.session.add_all([article1, article2])
+    # 同步session中的数据到数据库中
+    db.session.commit()
+    return "文章添加成功！"
+
+# 根据作者查询文章
+@app.route("/article/query")
+def query_article():
+    student = Student.query.get(2)
+    for article in student.articles:
+        print(article.title)
+    return "文章查找成功"
 
 
 
